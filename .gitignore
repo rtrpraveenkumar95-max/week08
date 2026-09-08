@@ -197,3 +197,9 @@ cython_debug/
 .cursorindexingignore
 
 node_modules/
+# Terraform local files
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
