@@ -78,6 +78,6 @@ variable "tags" {
   default = {
     Project   = "KoalaTech Course Platform"
     ManagedBy = "Terraform"
-    Practical = "Week08"
+    Practical = "9.3C"
   }
 }
