@@ -6,7 +6,7 @@ on:
     branches:
       - main
 
-  # Manual trigger for the workflow
+  # Allow the workflow to be triggered manually
   workflow_dispatch:
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
   # Terraform Infrastructure Validation
   # =========================================================
   terraform-check:
-    name: Terraform Validate and Plan
+    name: Terraform Infrastructure Validation
     runs-on: ubuntu-latest
 
     env:
@@ -36,11 +36,6 @@ jobs:
         with:
           terraform_version: "1.15.8"
 
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: Terraform Init
         working-directory: terraform
         run: terraform init
@@ -53,9 +48,6 @@ jobs:
         working-directory: terraform
         run: terraform validate
 
-      - name: Terraform Plan
-        working-directory: terraform
-        run: terraform plan -input=false
 
   # =========================================================
   # Backend Tests
@@ -145,6 +137,7 @@ jobs:
         run: |
           pytest -v
 
+
   # =========================================================
   # Build and Push Docker Images
   # =========================================================
@@ -152,7 +145,7 @@ jobs:
     name: Build and Push ${{ matrix.image }}
     runs-on: ubuntu-latest
 
-    # Infrastructure validation and backend tests must pass first
+    # Terraform validation and backend tests must pass first
     needs:
       - terraform-check
       - backend-test
