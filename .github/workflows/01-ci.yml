@@ -179,7 +179,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Build locally on the GitHub runner before authenticating to Azure
+      # Build the image locally on the GitHub Actions runner
       - name: Build Docker image
         run: |
           docker build \
@@ -187,12 +187,19 @@ jobs:
             -t ${{ matrix.image }}:${{ github.sha }} \
             ./${{ matrix.service }}
 
-      # Install Docker Scout CLI on the GitHub Actions runner
+      # Authenticate Docker Hub using repository secrets
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Install Docker Scout on the GitHub Actions runner
       - name: Install Docker Scout
         run: |
           curl -sSfL https://raw.githubusercontent.com/docker/scout-cli/main/install.sh | sh -s --
 
-      # Security gate: fail the job if Critical vulnerabilities are detected
+      # Security gate: stop the pipeline if Critical vulnerabilities are found
       - name: Docker Scout Vulnerability Scan
         run: |
           docker scout cves \
@@ -200,7 +207,7 @@ jobs:
             --exit-code \
             ${{ matrix.image }}:${{ github.sha }}
 
-      # Azure authentication occurs only after the image passes security scanning
+      # Azure authentication occurs only after security scanning succeeds
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -210,7 +217,7 @@ jobs:
         run: |
           az acr login --name ${{ vars.ACR_NAME }}
 
-      # Tag the successfully scanned image for ACR
+      # Tag the successfully scanned image for Azure Container Registry
       - name: Tag Docker image for ACR
         run: |
           docker tag \
