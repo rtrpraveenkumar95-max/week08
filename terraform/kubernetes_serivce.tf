@@ -1,6 +1,6 @@
 resource "azurerm_kubernetes_cluster" "aks" {
   name                = var.aks_cluster_name
-  location            = azurerm_resource_group.rg.location
+  location            = "japaneast"
   resource_group_name = azurerm_resource_group.rg.name
   dns_prefix          = var.aks_dns_prefix
   kubernetes_version  = var.kubernetes_version
